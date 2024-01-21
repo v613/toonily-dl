@@ -12,19 +12,12 @@ Download comics from [Toonily.com](https://toonily.com/) website
 ## How to use
 ```bash
 # run the script, it will ask you to provide a Toonily URL
-./downloader.sh
-Please insert an Toonly URL:
-Downloading https://toonily.com/webtoon/watch-dog/chapter-67/
-Make directory chapter-67
-Saving https://cdn.toonily.com/chapters/manga_5e374e1879325/a708112a2697523b6f385c845b0875c8/001.jpg
-Saving https://cdn.toonily.com/chapters/manga_5e374e1879325/a708112a2697523b6f385c845b0875c8/002.jpg
-...
-Saving https://cdn.toonily.com/chapters/manga_5e374e1879325/a708112a2697523b6f385c845b0875c8/158.jpg
-Saving https://cdn.toonily.com/chapters/manga_5e374e1879325/a708112a2697523b6f385c845b0875c8/159.jpg
-Downloading https://toonily.com/webtoon/watch-dog/chapter-66/
-Make directory chapter-66
-Saving https://cdn.toonily.com/chapters/manga_5e374e1879325/acbe00db9a74ae1fcdc675195037939c/001.jpg
-Saving https://cdn.toonily.com/chapters/manga_5e374e1879325/acbe00db9a74ae1fcdc675195037939c/054.jpg
+>> ./toonily-dl.sh https://toonily.com/webtoon/amazing-manga/
+Downloading chapter-14
+Make directory chapter-13
+Downloading chapter-13
+Make directory chapter-12
+Downloading chapter-12
 ...
 ```
 

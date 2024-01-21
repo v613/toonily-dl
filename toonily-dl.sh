@@ -1,9 +1,11 @@
 #!/bin/bash
 
-echo -n "Please insert an Toonly URL:"
-read -r URL
-
-toon=$(curl -s "$URL")
+if [[ $# -eq 0 || -z "$1" ]]; then
+	echo "invalid argument: URL"
+	echo "example: toonily-dl.sh https://toonily.com/webtoon/amazing-manga/" 
+	exit 1
+fi
+toon=$(curl -s "$1")
 
 Title_Line=$(echo "$toon" | grep -E "^<title>")
 start_idx=$(expr length "<title>Read ")
@@ -25,11 +27,10 @@ do
 	fi
 	cd "$chapter_dir" || exit
 	
-	echo "Downloading $chapter"
+	echo "Downloading $chapter_dir"
 	imgs=$(curl -s "$chapter"| grep -A1 -E "image-[[:digit:]]" | grep cdn | awk '{print substr($1,1,length($1)-1)}')
 	for img in $imgs;
 	do
-		echo "Saving $img"
 		wget --quiet --header 'authority: cdn.toonily.com' --header 'referer: https://toonily.com/' --continue "$img"
 	done
 
