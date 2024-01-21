@@ -1,4 +1,4 @@
-# ToonilyDownloader
+# Toonily-dl
 Download comics from [Toonily.com](https://toonily.com/) website
 
 ## Features
@@ -13,7 +13,8 @@ Download comics from [Toonily.com](https://toonily.com/) website
 ```bash
 # run the script, it will ask you to provide a Toonily URL
 ./downloader.sh
-Please insert an Toonly URL:Downloading https://toonily.com/webtoon/watch-dog/chapter-67/
+Please insert an Toonly URL:
+Downloading https://toonily.com/webtoon/watch-dog/chapter-67/
 Make directory chapter-67
 Saving https://cdn.toonily.com/chapters/manga_5e374e1879325/a708112a2697523b6f385c845b0875c8/001.jpg
 Saving https://cdn.toonily.com/chapters/manga_5e374e1879325/a708112a2697523b6f385c845b0875c8/002.jpg
