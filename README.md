@@ -7,7 +7,7 @@ Download comics from [Toonily.com](https://toonily.com/) website
 - [X] Download chapter in dedicated directory
   * [ ] Download in asceding order
   * [ ] Download picked chapters
-- [ ] Continue downloading, or update with new chapters/files
+- [X] Continue downloading, or update with new chapters/files
 
 ## How to use
 ```bash
