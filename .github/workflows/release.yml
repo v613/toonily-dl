@@ -8,7 +8,7 @@ jobs:
   release:
     name: Release on different platforms
     runs-on: ubuntu-latest
-    steps:
+    stepts:
       - name: Create
         uses: docker://goreleaser/goreleaser:latest
         with:
