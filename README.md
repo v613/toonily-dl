@@ -10,8 +10,9 @@ Download comics from [Toonily.com](https://toonily.com/) website
 - [X] Continue downloading, or update with new chapters/files
 
 ## How to use
+This application offers users the ability to run through either a simple bash script or a golang binary/executable, catering to different user preferences and system capabilities.based on their technical preferences and system requirements.
+### Bash
 ```bash
-# run the script, it will ask you to provide a Toonily URL
 >> ./toonily-dl.sh https://toonily.com/webtoon/amazing-manga/
 Downloading chapter-14
 Make directory chapter-13
@@ -20,12 +21,24 @@ Make directory chapter-12
 Downloading chapter-12
 ...
 ```
+### Golang
+```cmd
+C:\> toonily-dl.exe https://toonily.com/webtoon/amazing-manga/
+Download: Amazing Manga
+Working on chapter-9
+Downloaded 12 file(s)
+Working on chapter-8
+Downloaded 11 file(s)
+Working on chapter-7
+...
+```
 
 ### Result
 ![vokoscreenNG-2024-01-14_14-19-56 801](https://github.com/v613/ToonilyDownloader/assets/15879258/a956ac9c-b540-44f8-b8c6-326b52e8f5f2)
 
 ### Setup a better experience
-To have a better experience with the "toonily-dl.sh" script, it is recommended to save, move, or copy it to the "/usr/local/bin" directory. This directory is typically included in the system's PATH, which allows you to execute the script from any location in your terminal.
+To have a better experience, it is recommended to save, move, or copy it to the "/usr/local/bin" directory. This directory is typically included in the system's PATH, which allows you to execute the script from any location in your terminal.
+In Windows platforms, you need to throw the executable into a directory that is already in the PATH, or add a new one.
 
 Here is how you can do it:
 
@@ -42,7 +55,7 @@ Here is how you can do it:
    >sudo chmod 755 /usr/local/bin/toonily-dl
    >```
    >
-   >This will make the script executable. 
+   > This will make the script executable.
 
 5. After providing your password, the script will be moved to the "/usr/local/bin" directory.
 
