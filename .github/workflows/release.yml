@@ -9,8 +9,6 @@ jobs:
     name: Release on different platforms
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
       - name: Create
         uses: docker://goreleaser/goreleaser:latest
         with:
