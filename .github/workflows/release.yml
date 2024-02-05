@@ -1,0 +1,17 @@
+name: Release
+on:
+  create:
+    tags:
+      - v*
+
+jobs:
+  release:
+    name: Release on different platforms
+    runs-on: ubuntu-latest
+    stepts:
+      - name: Create
+        uses: docker://goreleaser/goreleaser:latest
+        with:
+          args: release
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
