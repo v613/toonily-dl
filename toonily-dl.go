@@ -108,6 +108,13 @@ func Wget(url string) []byte {
 }
 
 func DownloadFile(url string) error {
+	sl := strings.Split(url, "/")
+	filename := sl[len(sl)-1]
+	if _, err := os.Stat(filename); err == nil {
+		// file already present, skip it.
+		return nil
+	}
+
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authority", "cdn.toonily.com")
 	req.Header.Set("Referer", "https://toonily.com/")
@@ -118,8 +125,7 @@ func DownloadFile(url string) error {
 	}
 	defer r.Body.Close()
 
-	sl := strings.Split(url, "/")
-	file, err := os.Create(sl[len(sl)-1])
+	file, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
