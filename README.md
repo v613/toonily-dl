@@ -14,11 +14,12 @@ This application offers users the ability to run through either a simple bash sc
 ### Bash
 ```bash
 >> ./toonily-dl.sh https://toonily.com/webtoon/amazing-manga/
-Downloading chapter-14
-Make directory chapter-13
-Downloading chapter-13
-Make directory chapter-12
-Downloading chapter-12
+Download: Amazing Manga
+Working on chapter-9
+Downloaded 12 file(s)
+Working on chapter-8
+Downloaded 11 file(s)
+Working on chapter-7
 ...
 ```
 ### Golang

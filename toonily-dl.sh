@@ -16,23 +16,24 @@ if [ ! -d "$title" ]; then
 	mkdir "$title"
 fi
 cd "$title" || exit
+echo "Download: $title"
 
 chapters=$(echo "$toon" | grep -A1 -w "class=\"wp-manga-chapter" | grep href | cut -d "\"" -f2)
 for chapter in $chapters;
 do 
 	chapter_dir=$(echo "$chapter" | cut -d "/" -f6)
 	if [ ! -d "$chapter_dir" ]; then
-		echo "Make directory $chapter_dir"
 		mkdir "$chapter_dir"
 	fi
 	cd "$chapter_dir" || exit
 	
-	echo "Downloading $chapter_dir"
+	echo "Working on $chapter_dir"
 	imgs=$(curl -s "$chapter"| grep -A1 -E "image-[[:digit:]]" | grep cdn | awk '{print substr($1,1,length($1)-1)}')
 	for img in $imgs;
 	do
 		wget --quiet --header 'authority: cdn.toonily.com' --header 'referer: https://toonily.com/' --continue "$img"
 	done
+	echo "Downloaded $(ls -1|wc -l) file(s)"
 
 	# Exit from chapter directory
 	cd ../
