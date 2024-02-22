@@ -29,6 +29,7 @@ func main() {
 	var title string
 	var chapters []string
 	var chapterSection bool
+	var cover string
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -41,6 +42,14 @@ func main() {
 			continue
 		}
 		chapterSection = strings.Contains(line, "<li class=\"wp-manga-chapter")
+		if cover == "" {
+			if sIdx := strings.Index(line, `data-src="`); sIdx > 0 {
+				sIdx += 10 // 10 <== `data-src="`
+				if eIdx := strings.Index(line[sIdx:], `"`); eIdx > 0 {
+					cover = line[sIdx : sIdx+eIdx]
+				}
+			}
+		}
 
 		if title == "" {
 			if strings.HasPrefix(line, "<title>") {
@@ -53,6 +62,8 @@ func main() {
 
 	MakeDir(title)
 	os.Chdir(title)
+	DownloadCover(cover)
+
 	fmt.Println("Download:", title)
 	for _, url := range chapters {
 		sl := strings.Split(url, "/")
@@ -108,13 +119,14 @@ func Wget(url string) []byte {
 }
 
 func DownloadFile(url string) error {
-	sl := strings.Split(url, "/")
-	filename := sl[len(sl)-1]
+	filename := FilenameFromURL(url)
+	if filename == "" {
+		return errors.New("invalid URL:" + url)
+	}
 	if _, err := os.Stat(filename); err == nil {
 		// file already present, skip it.
 		return nil
 	}
-
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authority", "cdn.toonily.com")
 	req.Header.Set("Referer", "https://toonily.com/")
@@ -133,4 +145,27 @@ func DownloadFile(url string) error {
 
 	_, err = io.Copy(file, r.Body)
 	return err
+}
+
+func FilenameFromURL(url string) string {
+	if !strings.HasPrefix(url, "http") {
+		return ""
+	}
+	sl := strings.Split(url, "/")
+	if l := len(sl); l > 2 {
+		return sl[l-1]
+	}
+	return ""
+}
+
+func DownloadCover(url string) {
+	if _, err := os.Stat("cover.jpg"); os.IsNotExist(err) {
+		if err = DownloadFile(url); err != nil {
+			fmt.Println("cannot download cover image ==> ", err)
+			return
+		}
+		if err = os.Rename(FilenameFromURL(url), "cover.jpg"); err != nil {
+			fmt.Println(err)
+		}
+	}
 }

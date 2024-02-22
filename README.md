@@ -8,6 +8,7 @@ Download comics from [Toonily.com](https://toonily.com/) website
   * [ ] Download in asceding order
   * [ ] Download picked chapters
 - [X] Continue downloading, or update with new chapters/files
+- [X] Download comic's cover image
 
 ## How to use
 This application offers users the ability to run through either a simple bash script or a golang binary/executable, catering to different user preferences and system capabilities.based on their technical preferences and system requirements.

@@ -18,6 +18,10 @@ fi
 cd "$title" || exit
 echo "Download: $title"
 
+if [ ! -e "cover.jpg" ]; then
+	wget -qc $(echo "$toon" | grep -oP 'data-src="\K[^"]+') -o "cover.jpg"
+fi
+
 chapters=$(echo "$toon" | grep -A1 -w "class=\"wp-manga-chapter" | grep href | cut -d "\"" -f2)
 for chapter in $chapters;
 do 
