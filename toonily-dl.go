@@ -4,25 +4,65 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 var (
 	regex  = regexp.MustCompile(`\bhttps:\/\/cdn.\b.*\.jpg`)
 	client = http.Client{}
+	usage  = `
+SYNOPSIS
+	toonily-dl [flag]... <URL>
+FLAGS
+	-h
+	    Print help message
+	-c
+	    Indicate the chapter's list to download.
+	    Example:
+		    toonily-dl -c 3         :: download only chapter 3
+		    toonily-dl -c 13:       :: download chapters starting with 13 until the end
+		    toonily-dl -c 213:321   :: download chapters starting with 213 to 321
+		    toonily-dl -c :3210     :: download chapters up to 3210
+`
 )
 
 func main() {
-	url := os.Args[1]
+	url := os.Args[len(os.Args)-1]
 	if url == "" {
 		fmt.Printf("invalid argument: URL\nexample: toonily-dl <URL>\n")
 		os.Exit(1)
 	}
+
+	flagC := flag.String("c", "", "Indicate the chapters's list to download")
+	flagH := flag.Bool("h", false, "Print help message")
+	flag.Parse()
+
+	if *flagH {
+		fmt.Println(usage)
+		os.Exit(0)
+	}
+
+	chapterRange := [2]int{}
+	for idx, v := range strings.Split(*flagC, ":") {
+		n, err := strconv.Atoi(v)
+		switch {
+		case v == "" && idx == 0:
+		case v == "" && idx == 1:
+			n = 1 << 20
+		case err != nil, idx > 1, (idx == 1 && n < chapterRange[0]):
+			fmt.Println(usage)
+			os.Exit(1)
+		}
+		chapterRange[idx] = n
+	}
+
 	scanner := bufio.NewScanner(bytes.NewReader(Wget(url)))
 	scanner.Split(bufio.ScanLines)
 
@@ -37,7 +77,13 @@ func main() {
 		if chapterSection {
 			// 9 <== `<a href="`
 			// 3 <== `/">`
-			chapters = append(chapters, line[9:len(line)-3])
+			link := line[9 : len(line)-3]
+			n, _ := strconv.Atoi(link[strings.LastIndex(link, "-")+1:])
+			between := chapterRange[0] <= n && n <= chapterRange[1]
+			exact := chapterRange[0] == n && chapterRange[1] == 0
+			if between || exact {
+				chapters = append(chapters, link)
+			}
 			chapterSection = false
 			continue
 		}

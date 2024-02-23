@@ -6,7 +6,7 @@ Download comics from [Toonily.com](https://toonily.com/) website
 - [X] Download comics in dedicated directory
 - [X] Download chapter in dedicated directory
   * [ ] Download in asceding order
-  * [ ] Download picked chapters
+  * [X] Download picked chapters
 - [X] Continue downloading, or update with new chapters/files
 - [X] Download comic's cover image
 
@@ -34,6 +34,22 @@ Downloaded 11 file(s)
 Working on chapter-7
 ...
 ```
+
+```bash
+SYNOPSIS
+		toonily-dl [flag]... <URL>
+	FLAGS
+  
+		-c
+		    Indicate the chapter's list to download.
+		    Example:
+			    toonily-dl -c 3         :: download only chapter 3
+			    toonily-dl -c 13:       :: download chapters starting with 13 until the end
+			    toonily-dl -c 213:321   :: download chapters starting with 213 to 321
+			    toonily-dl -c :3210     :: download chapters up to 3210
+```
+
+
 
 ### Result
 ![vokoscreenNG-2024-01-14_14-19-56 801](https://github.com/v613/ToonilyDownloader/assets/15879258/a956ac9c-b540-44f8-b8c6-326b52e8f5f2)
