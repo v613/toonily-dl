@@ -12,6 +12,6 @@ do
 		if [ "$os" = "windows" ]; then
 			ext=".exe"
 		fi
-		GOOS=$OS GOARCH=$arch go build -ldflags="-s -w" -o "toonily-dl-$LastTag-$os-$arch$ext"
+		GOOS=$os GOARCH=$arch go build -ldflags="-s -w" -o "toonily-dl-$LastTag-$os-$arch$ext"
 	done
 done
