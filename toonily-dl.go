@@ -81,7 +81,7 @@ func main() {
 			n, _ := strconv.Atoi(link[strings.LastIndex(link, "-")+1:])
 			between := chapterRange[0] <= n && n <= chapterRange[1]
 			exact := chapterRange[0] == n && chapterRange[1] == 0
-			if between || exact {
+			if between || exact || *flagC == "" {
 				chapters = append(chapters, link)
 			}
 			chapterSection = false
