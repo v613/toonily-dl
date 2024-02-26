@@ -1,6 +1,6 @@
 #!/bin/bash
 LastTag=$(git tag -l --sort=-version:refname "v*" | head -n 1)
-OS=("plan9" "openbsd" "freebsd" "darwin" "linux" "windows")
+OS=("openbsd" "freebsd" "darwin" "linux" "windows")
 ARCH=("amd64" "386")
 
 for os in ${OS[@]}
