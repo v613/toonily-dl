@@ -12,10 +12,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 var (
-	regex  = regexp.MustCompile(`\bhttps:\/\/cdn.\b.*\.jpg`)
+	regex  = regexp.MustCompile(`\bhttps:\/\/cdn.\b.*\.(?i)(jpg|jpeg|png|webp)`)
 	client = http.Client{}
 	usage  = `
 SYNOPSIS
@@ -33,20 +34,28 @@ FLAGS
 `
 )
 
-func main() {
-	url := os.Args[len(os.Args)-1]
-	if url == "" {
-		fmt.Printf("invalid argument: URL\nexample: toonily-dl <URL>\n")
-		os.Exit(1)
-	}
+type Book struct {
+	Title       string
+	Description string
+	Cover       string
+	Chapters    []string
+}
 
+func main() {
 	flagC := flag.String("c", "", "Indicate the chapters's list to download")
 	flagH := flag.Bool("h", false, "Print help message")
+	flagD := flag.Bool("d", false, "Save description")
 	flag.Parse()
 
 	if *flagH {
 		fmt.Println(usage)
 		os.Exit(0)
+	}
+
+	url := os.Args[len(os.Args)-1]
+	if url == "" {
+		fmt.Printf("invalid argument: URL\nexample: toonily-dl <URL>\n")
+		os.Exit(1)
 	}
 
 	chapterRange := [2]int{}
@@ -66,10 +75,9 @@ func main() {
 	scanner := bufio.NewScanner(bytes.NewReader(Wget(url)))
 	scanner.Split(bufio.ScanLines)
 
-	var title string
-	var chapters []string
+	book := Book{}
 	var chapterSection bool
-	var cover string
+	var summarySection bool
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -78,42 +86,64 @@ func main() {
 			// 9 <== `<a href="`
 			// 3 <== `/">`
 			link := line[9 : len(line)-3]
-			n, _ := strconv.Atoi(link[strings.LastIndex(link, "-")+1:])
+			n, err := strconv.Atoi(link[strings.LastIndex(link, "-")+1:])
+			if err != nil {
+				fmt.Printf("Unexpected chapter %q is about to be downloaded\n", link[strings.LastIndex(link, "/")+1:])
+			}
 			between := chapterRange[0] <= n && n <= chapterRange[1]
 			exact := chapterRange[0] == n && chapterRange[1] == 0
-			if between || exact || *flagC == "" {
-				chapters = append(chapters, link)
+			if between || exact || *flagC == "" || err != nil {
+				book.Chapters = append(book.Chapters, link)
 			}
 			chapterSection = false
 			continue
 		}
 		chapterSection = strings.Contains(line, "<li class=\"wp-manga-chapter")
-		if cover == "" {
+
+		if summarySection {
+			book.Description = line[4 : len(line)-4]
+			summarySection = false
+			continue
+		}
+		if book.Description == "" {
+			summarySection = strings.Contains(line, "summary__content")
+		}
+		if book.Cover == "" {
 			if sIdx := strings.Index(line, `data-src="`); sIdx > 0 {
 				sIdx += 10 // 10 <== `data-src="`
 				if eIdx := strings.Index(line[sIdx:], `"`); eIdx > 0 {
-					cover = line[sIdx : sIdx+eIdx]
+					book.Cover = line[sIdx : sIdx+eIdx]
 				}
 			}
 		}
 
-		if title == "" {
+		if book.Title == "" {
 			if strings.HasPrefix(line, "<title>") {
 				// 12 <== `<title>Read `
 				// 24 <== ` Manga - Toonily</title>`
-				title = line[12 : len(line)-24]
+				book.Title = line[12 : len(line)-24]
+				book.Title = strings.ReplaceAll(book.Title, "&#8217;", "'")
+				book.Title = strings.ReplaceAll(book.Title, "&#8230;", "...")
 			}
 		}
 	}
 
-	MakeDir(title)
-	os.Chdir(title)
-	DownloadCover(cover)
+	MakeDir(book.Title)
+	os.Chdir(book.Title)
+	DownloadCover(book.Cover)
 
-	fmt.Println("Download:", title)
-	for _, url := range chapters {
+	if *flagD {
+		SaveTextToFile(book.Description, "description.txt")
+	}
+
+	fmt.Println("Download:", book.Title)
+	for _, url := range book.Chapters {
 		sl := strings.Split(url, "/")
-		chapter := sl[len(sl)-1]
+		slen := len(sl)
+		chapter := fmt.Sprintf("chapter-%03s", sl[len(sl)-1][8:]) // 8 <== `chapter-`
+		if !strings.HasPrefix(sl[slen-1], "chapter-") {
+			chapter = sl[slen-1] // unexpected chapter
+		}
 		MakeDir(chapter)
 		os.Chdir(chapter)
 
@@ -121,15 +151,21 @@ func main() {
 		page := bufio.NewScanner(bytes.NewReader(Wget(url)))
 		page.Split(bufio.ScanLines)
 
+		var wg sync.WaitGroup
 		for page.Scan() {
 			img := regex.FindString(page.Text())
 			if len(img) == 0 {
 				continue
 			}
-			if err := DownloadFile(img); err != nil {
-				fmt.Println("[error]", err)
-			}
+			wg.Add(1)
+			go func(wg *sync.WaitGroup, img string) {
+				defer wg.Done()
+				if err := DownloadFile(img); err != nil {
+					fmt.Println("[error]", err)
+				}
+			}(&wg, img)
 		}
+		wg.Wait()
 		os.Chdir("../")
 
 		if cnt, err := os.ReadDir(chapter); err == nil {
@@ -213,5 +249,24 @@ func DownloadCover(url string) {
 		if err = os.Rename(FilenameFromURL(url), "cover.jpg"); err != nil {
 			fmt.Println(err)
 		}
+	}
+}
+
+func SaveTextToFile(txt, dst string) {
+	if _, err := os.Stat(dst); err == nil {
+		return
+	}
+
+	file, err := os.Create(dst)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	txt = strings.ReplaceAll(txt, "s/&#8217;", "'")
+	txt = strings.ReplaceAll(txt, "&#8230;", "...")
+	if _, err = file.WriteString(txt); err != nil {
+		fmt.Println(err)
 	}
 }
