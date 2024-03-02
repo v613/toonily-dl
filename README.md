@@ -40,6 +40,8 @@ SYNOPSIS
 		toonily-dl [flag]... <URL>
 	FLAGS
   
+		-d
+            Save description
 		-c
 		    Indicate the chapter's list to download.
 		    Example:
