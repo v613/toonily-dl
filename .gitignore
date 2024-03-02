@@ -1,0 +1,8 @@
+# Folders
+.idea
+.vscode
+
+# Extentions
+*.sum
+*.exe
+*.code-workspace
